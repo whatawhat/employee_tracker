@@ -28,3 +28,9 @@ INSERT INTO employee
 ("Thomas", "Alvarez", 6, null),
 ("Melissa", "Edwards", 7, null),
 ("Sally", "Jordan", 1, null);
+
+/* Try to add this part */
+-- ("Tom", "Jones", 2, 4),
+-- ("Daniel", "Porter", 4, 2),
+-- ("Joshua", "Marshall", 5, 3),
+-- ("Sabrina", "Mills", 5, 3);
