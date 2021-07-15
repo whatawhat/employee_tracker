@@ -54,6 +54,23 @@ const connection = mysql.createConnection({
   }
 
 function addEmployee() {
+    connection.query("SELECT * FROM role", function (error, data) {
+        if (error) throw error;
+        console.log(data);
+        var roleChoice = data.map(role => ({
+            value:role.id,
+            name:role.title,
+        }))
+    connection.query("SELECT * FROM employee", function (error, data) {
+        if (error) throw error;
+        console.log(data);
+        var employeeChoice = data.map(employee => ({
+            value:employee.id,
+            name:employee.first_name + " " + employee.last_name,
+            value: '',
+            name:"none",
+        }))
+   
     inquirer.prompt([{
         type: "input",
         name: "first_name",
@@ -65,23 +82,27 @@ function addEmployee() {
         message: "Employess last name?"
     },
     {
-        type: "number",
+        type: "list",
         name: "role_id",
-        message: "Employees role id?"
+        message: "Employees role id?",
+        choices: roleChoice
     },
     {
-        type: "number",
+        type: "list",
         name: "manager_id",
-        message: "Employees manager's ID?"
+        message: "Employees manager's ID?",
+        choices: employeeChoice
     }
 ]).then(function(res) {
+    console.log(res)
     connection.query('INSERT INTO  employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)' [res.first_name, res.last.name, res.role_id, res.manager_id], function (err, data) {
         if (error) throw error;
         console.table("Inserted!")
         menu();
     })
 })
-
+})
+})
 }
 
 function addDepartment() {
