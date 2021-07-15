@@ -9,8 +9,8 @@ const connection = mysql.createConnection({
     user: 'root',
   
     // Be sure to update with your own MySQL password!
-    password: '',
-    database: 'employeetrack_db',
+    password: 'Peacejoy@82',
+    database: 'employeetracker_db',
   });
   
   connection.connect(function (error) {
@@ -48,10 +48,7 @@ const connection = mysql.createConnection({
                 updateEmployeeRole()
                 break;
             case "Exit":
-                break;
-            default:
                 connection.end()
-                break;
           }
       })
   }
