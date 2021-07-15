@@ -100,6 +100,13 @@ function addDepartment() {
 }
 
 function addRole() {
+    connection.query("SELECT * FROM department", function(error, data) {
+        if (error) throw error;
+        console.log(data);
+        var choicesdepartment = data.map(department => ({
+            value:department.id,
+            name:department.name,
+        }))
     inquirer.prompt([
         {
             message: "Role Name",
@@ -112,16 +119,19 @@ function addRole() {
         name: "salary"
     },
     {
-        message: "Department ID:",
-        type: "number",
+        message: "What is the department",
+        type: "list",
+        choices: choicesdepartment,
         name: "department_id"
     }
 ]).then(function(response) {
+    console.log(response);
     connection.query("INSERT INTO role (title, salary, department_id) values (?, ?, ?)", [response.title, response.salary, response.department_id], function (error, data) {
         if (error) throw error;
-        console.table(data);
+        console.log("New Role Created!");
+        menu();
     })
-    menu();
+})
 })
 }
 
