@@ -288,7 +288,7 @@ function deleteEmployee() {
     .then(function(res) {
         console.log(res);
         connection.query (
-            "DELETE FROM employe WHERE (?)" (res.employeeName),
+            "DELETE FROM employe WHERE (?)" [res.employeeName],
             function (error, data) {
                 if (error) throw error;
                 console.log(data);
@@ -299,12 +299,6 @@ function deleteEmployee() {
     })
     })
 }
-
-
-
-
-
-
 
 
 
