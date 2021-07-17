@@ -181,27 +181,40 @@ function viewRoles() {
 }
 
 function updateEmployeeRole() {
+    connection.query("SELECT * FROM employee", function (error, data) {
+        if (error) throw error;
+        console.log(data);
+        var employeeSelect = data.map(employee => ({
+            value:employee.id,
+            name:employee.first_name + " " + employee.last_name,
+    }))
+    connection.query("SELECT * FROM role", function (error, data) {
+        if (error) throw error;
+        console.log(data);
+        var roleSelect = data.map(role => ({
+            value:role.id,
+            name:role.title,
+        }))
     inquirer.prompt([
         {
-            message: "What is the first name of the employee you would like to update?",
-            type: "input",
-            name: "first_name"
+            type: "list",
+            message: "Which Employee would you like to update?",
+            name: "employee_name",
+            choices: employeeSelect
         }, 
         {
-            message: "What is the last name of the employee you would like to update?",
-            type: "input",
-            name: "last_name"
-        },
-        {
-            message: "Enter the new role id: ",
-            type: "number",
-            name: "role_id"
+            type: "list",
+            message: "What role would you like to assign?",
+            name: "role_id",
+            choices:roleSelect
         }
     ]).then(function(response) {
-        connection.query("UPDATE employee SET role_id = ? WHERE first_name = ? AND last_name = ?", [response.role_id, response.first_name, response.last_name], function(error,data) {
+        connection.query("UPDATE employee SET role_id = ? WHERE first_name = ? AND last_name = ?", [response.employee_name, response.role.id], function(error,data) {
             if (error) throw error;
             console.table(data);
         })
     })
+})
+})
     menu();
 }
