@@ -58,6 +58,9 @@ function menu() {
         case "Update Employee Role":
           updateEmployeeRole();
           break;
+        case "Delete Employee":
+            deleteEmployee();
+            break;
         case "Exit":
           connection.end();
       }
@@ -264,6 +267,45 @@ function updateEmployeeRole() {
   });
   menu();
 }
+
+function deleteEmployee() {
+    connection.query("SELECT * FROM employee", function (error, data) {
+        if (error) throw error;
+        console.log(data);
+        var employeeChoice = data.map((employee) => ({
+            value:employee.id,
+            name: employee.first_name + " " + employee.last_name,
+        }));
+        inquirer.prompt([ 
+            {
+                type:"list",
+                name:"emplyeeName",
+                message:"What employee would you like to delete?",
+                choices:employeeChoice,
+        },
+    ])
+    .then(function(res) {
+        console.log(res);
+        connection.query (
+            "DELETE FROM employe WHERE (?)" (res.employeeName),
+            function (error, data) {
+                if (error) throw error;
+                console.log(data);
+                console.table("Removed!");
+                menu();
+            }
+        )
+    })
+    })
+}
+
+
+
+
+
+
+
+
 
 //Join Employee and department
 
