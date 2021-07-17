@@ -32,6 +32,7 @@ function menu() {
         "View departments",
         "View Roles",
         "Update Employee Role",
+        "Delete Employee",
         "Exit",
       ],
     })
