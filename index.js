@@ -33,6 +33,8 @@ function menu() {
         "View Roles",
         "Update Employee Role",
         "Delete Employee",
+        "Delete Department",
+        "Delete Role",
         "Exit",
       ],
     })
@@ -62,6 +64,12 @@ function menu() {
         case "Delete Employee":
             deleteEmployee();
             break;
+        case "Delete Department":
+            deleteDepartment();
+            break;
+        case "Delete Role":
+            deleteRole();
+            break;
         case "Exit":
           connection.end();
       }
@@ -72,20 +80,26 @@ function menu() {
 function addEmployee() {
   connection.query("SELECT * FROM role", function (error, data) {
     if (error) throw error;
-    console.log(data);
+    //console.log(data);
     var roleChoice = data.map((role) => ({
       value: role.id,
       name: role.title,
     }));
     connection.query("SELECT * FROM employee", function (error, data) {
       if (error) throw error;
-      console.log(data);
+      //console.log(data);
       var employeeChoice = data.map((employee) => ({
         value: employee.id,
         name: employee.first_name + " " + employee.last_name,
         //value: '',
         //name:"none",
       }));
+      //console.log("Adding a blank name", employeeChoice);
+      employeeChoice.push({
+        value:null,
+        name:"none"
+      })
+      //console.log("After push", employeeChoice);
 
       inquirer
         .prompt([
@@ -115,9 +129,9 @@ function addEmployee() {
         .then(function (res) {
           console.log(res);
           connection.query(
-            "INSERT INTO  employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)"[
-              (res.first_name, res.last.name, res.role_id, res.manager_id)
-            ],
+            "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)", 
+              [res.first_name, res.last_name, res.role_id, res.manager_id]
+            ,
             function (error, data) {
               if (error) throw error;
               console.log(data);
@@ -157,7 +171,7 @@ function addDepartment() {
 function addRole() {
   connection.query("SELECT * FROM department", function (error, data) {
     if (error) throw error;
-    console.log(data);
+    //console.log(data);
     var choicesdepartment = data.map((department) => ({
       value: department.id,
       name: department.name,
@@ -198,7 +212,7 @@ function addRole() {
 
 //View a list of employees
 function viewEmployees() {
-  connection.query("SELECT * FROM employee", function (error, data) {
+  connection.query("SELECT employee.first_name, employee.last_name, role.title AS role, manager.first_name AS manager FROM employee LEFT JOIN role ON role_id = role.id LEFT JOIN employee manager ON manager.id = employee.manager_id", function (error, data) {
     if (error) throw error;
     console.table(data);
     menu();
@@ -216,7 +230,7 @@ function viewDepartments() {
 
 //View a list of roles
 function viewRoles() {
-  connection.query("SELECT * FROM role", function (error, data) {
+  connection.query("SELECT role.id, role.title, department.name AS department, role.salary FROM role LEFT JOIN department ON department_id = department.id", function (error, data) {
     if (error) throw error;
     console.table(data);
     menu();
@@ -227,14 +241,12 @@ function viewRoles() {
 function updateEmployeeRole() {
   connection.query("SELECT * FROM employee", function (error, data) {
     if (error) throw error;
-    console.log(data);
     var employeeSelect = data.map((employee) => ({
       value: employee.id,
       name: employee.first_name + " " + employee.last_name,
     }));
     connection.query("SELECT * FROM role", function (error, data) {
       if (error) throw error;
-      console.log(data);
       var roleSelect = data.map((role) => ({
         value: role.id,
         name: role.title,
@@ -244,7 +256,7 @@ function updateEmployeeRole() {
           {
             type: "list",
             message: "Which Employee would you like to update?",
-            name: "employee_name",
+            name: "employee_id",
             choices: employeeSelect,
           },
           {
@@ -256,31 +268,35 @@ function updateEmployeeRole() {
         ])
         .then(function (response) {
           connection.query(
-            "UPDATE employee SET role_id = ? WHERE first_name = ? AND last_name = ?",
-            [response.employee_name, response.role.id],
+            "UPDATE employee SET role_id = ? WHERE id = ?",
+            [response.role_id, response.employee_id],
             function (error, data) {
+                console.log(response)
               if (error) throw error;
-              console.table(data);
+              console.log("Updated!");
+              //console.table(data);
+              menu();
             }
           );
         });
     });
   });
-  menu();
+  //menu();
 }
 
+//Delete Employee
 function deleteEmployee() {
     connection.query("SELECT * FROM employee", function (error, data) {
         if (error) throw error;
         console.log(data);
         var employeeChoice = data.map((employee) => ({
             value:employee.id,
-            name: employee.first_name + " " + employee.last_name,
+            name:employee.first_name + " " + employee.last_name,
         }));
         inquirer.prompt([ 
             {
                 type:"list",
-                name:"emplyeeName",
+                name:"employeeName",
                 message:"What employee would you like to delete?",
                 choices:employeeChoice,
         },
@@ -288,7 +304,7 @@ function deleteEmployee() {
     .then(function(res) {
         console.log(res);
         connection.query (
-            "DELETE FROM employe WHERE (?)" [res.employeeName],
+            `DELETE FROM employee WHERE id=${res.employeeName}`,
             function (error, data) {
                 if (error) throw error;
                 console.log(data);
@@ -301,9 +317,93 @@ function deleteEmployee() {
 }
 
 
+//Delete Department
+function deleteDepartment() {
+  connection.query("SELECT * FROM department", function (error, data) {
+      if (error) throw error;
+      //console.log(data);
+      var departmentChoice = data.map((department) => ({
+          value:department.id,
+          name:department.name,
+      }));
+      inquirer.prompt([ 
+          {
+              type:"list",
+              name:"departmentName",
+              message:"What department would you like to delete?",
+              choices:departmentChoice,
+      },
+  ])
+  .then(function(res) {
+      console.log(res);
+      connection.query (
+          `DELETE FROM department WHERE id=${res.departmentName}`,
+          function (error, data) {
+              if (error) throw error;
+              console.log(data);
+              console.table("Removed!");
+              menu();
+          }
+      )
+  })
+  })
+}
 
-//Join Employee and department
 
-//Delete Employee
+//Delete Role
+function deleteRole() {
+  connection.query("SELECT * FROM role", function (error, data) {
+      if (error) throw error;
+      //console.log(data);
+      var roleChoice = data.map((role) => ({
+          value:role.id,
+          name:role.title,
+      }));
+      inquirer.prompt([ 
+          {
+              type:"list",
+              name:"roleName",
+              message:"What role would you like to delete?",
+              choices:roleChoice,
+      },
+  ])
+  .then(function(res) {
+      console.log(res);
+      connection.query (
+          `DELETE FROM role WHERE id=${res.roleName}`,
+          function (error, data) {
+              if (error) throw error;
+              console.log(data);
+              console.table("Removed!");
+              menu();
+          }
+      )
+  })
+  })
+}
+
 
 //Fix if employee is a manager so they can select that they are a manager
+
+//to select from two columns in a table:
+//SELECT <column name>, <column name> FROM <table name>
+
+//Curious on how to make each function its own .js file to make the code easier to read
+
+//What Works
+//View Employees; View departments; View Roles
+
+//To Do
+//Delete quit from departments
+//Delete roles
+//Delete employees
+//Join employees to roles using 
+
+
+//Other departments to add: Human Resources, Communication
+//Roles for HR: HR Director; HR Administrator; Staffing Coordinator
+//Roles for Communication: Communication lead; Specialist; Networking Specialist
+
+//Employees to add:
+//Xavier Nelson; Adam Clark
+//Michelle Owens; Lillian Morris; Silvia Rivera
